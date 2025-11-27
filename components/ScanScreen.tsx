@@ -58,7 +58,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           quality: 0.8,
         });
         
-        // Simulasi scan (Anda bisa integrasikan dengan AI/ML model di sini)
+        // Simulasi scan (nanti akan diintegrasikan dengan AI/ML model di sini)
         const mockScannedValue = Math.random() > 0.5 ? '1' : '0';
         
         if (scanStep === 'input-a') {
@@ -86,9 +86,19 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
         } else if (scanStep === 'logic-gate') {
           const gates = ['AND', 'OR', 'NOT', 'NAND', 'NOR', 'XOR'];
           const mockGate = gates[Math.floor(Math.random() * gates.length)];
-          setScannedData({ ...scannedData, logicGate: mockGate });
+          const updatedData = { ...scannedData, logicGate: mockGate };
+          setScannedData(updatedData);
           setIsCameraActive(false);
-          Alert.alert('Scan Selesai!', `Logic Gate: ${mockGate}\n\nSemua scan telah selesai.`);
+          
+          // Navigasi ke halaman Result
+          setTimeout(() => {
+            navigation.navigate('Result', {
+              inputA: updatedData.inputA || '0',
+              inputB: updatedData.inputB || '0',
+              logicGate: mockGate as any,
+              source: 'scan',
+            });
+          }, 500);
         }
       } catch (error) {
         Alert.alert('Error', 'Gagal mengambil foto');
