@@ -4,6 +4,10 @@ import HomeScreen from 'components/Home';
 import ScanScreen from 'components/ScanScreen';
 import ManualInputScreen from 'components/ManualInputScreen';
 import ResultScreen from 'components/ResultScreen';
+import LearnScreen from 'components/LearnScreen';
+import BasicLogicGatesScreen from 'components/BasicLogicGatesScreen';
+import TruthTablesScreen from 'components/TruthTablesScreen';
+import LogicGateSymbolsScreen from 'components/LogicGateSymbolsScreen';
 import { StatusBar } from 'expo-status-bar';
 import { LogicGateType } from 'utils/logicGates';
 
@@ -13,6 +17,10 @@ export type RootStackParamList = {
   Home: undefined;
   Scan: undefined;
   ManualInput: undefined;
+  Learn: undefined;
+  BasicLogicGates: undefined;
+  TruthTables: undefined;
+  LogicGateSymbols: undefined;
   Result: {
     inputA: string;
     inputB: string;
@@ -34,6 +42,10 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Scan" component={ScanScreen} />
         <Stack.Screen name="ManualInput" component={ManualInputScreen} />
+        <Stack.Screen name="Learn" component={LearnScreen} />
+        <Stack.Screen name="BasicLogicGates" component={BasicLogicGatesScreen} />
+        <Stack.Screen name="TruthTables" component={TruthTablesScreen} />
+        <Stack.Screen name="LogicGateSymbols" component={LogicGateSymbolsScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
       </Stack.Navigator>
       <StatusBar style="auto" />

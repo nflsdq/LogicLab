@@ -39,7 +39,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
           <TouchableOpacity
             className="rounded-full border border-gray-300 bg-white px-6 py-4 active:bg-gray-50"
-            onPress={() => console.log('Learn')}>
+            onPress={() => navigation.navigate('Learn')}>
             <Text className="text-center text-lg font-semibold text-black">Learn</Text>
           </TouchableOpacity>
         </View>
