@@ -22,12 +22,10 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   }>({});
   const cameraRef = useRef<CameraView>(null);
 
-  // Jika permission belum diminta
   if (!permission) {
     return <View />;
   }
 
-  // Jika permission belum diberikan
   if (!permission.granted) {
     return (
       <View className="flex-1 justify-center bg-white px-6">
@@ -58,7 +56,6 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           quality: 0.8,
         });
         
-        // Simulasi scan (nanti akan diintegrasikan dengan AI/ML model di sini)
         const mockScannedValue = Math.random() > 0.5 ? '1' : '0';
         
         if (scanStep === 'input-a') {
@@ -90,7 +87,6 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           setScannedData(updatedData);
           setIsCameraActive(false);
           
-          // Navigasi ke halaman Result
           setTimeout(() => {
             navigation.navigate('Result', {
               inputA: updatedData.inputA || '0',
@@ -159,13 +155,11 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           facing={facing}
         >
           <View className="flex-1 justify-between bg-transparent p-6">
-            {/* Header */}
             <View className="items-center pt-12">
               <Text className="text-2xl font-bold text-white">{getStepTitle()}</Text>
               <Text className="mt-2 text-base text-white/90">{getStepDescription()}</Text>
             </View>
 
-            {/* Scan Frame */}
             <View className="items-center justify-center">
               <View className="h-64 w-64 rounded-xl border-4 border-white/70" />
               {scannedData.inputA && scanStep !== 'input-a' && (
@@ -180,7 +174,6 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
               )}
             </View>
 
-            {/* Controls */}
             <View className="items-center gap-4 pb-8">
               <TouchableOpacity
                 className="h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-white/30"
@@ -202,16 +195,13 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-white px-6 pt-12">
-      {/* Back Button */}
       <TouchableOpacity
         className="mb-4 w-12 h-12 items-center justify-center"
         onPress={() => navigation.goBack()}>
         <Text className="text-2xl text-black">←</Text>
       </TouchableOpacity>
 
-      {/* Card Container */}
       <View className="mx-auto w-full max-w-md rounded-3xl bg-white p-6">
-        {/* Header */}
         <View className="mb-6">
           <Text className="text-2xl font-bold text-black">LogicLab Vision</Text>
           <Text className="mt-2 text-right text-sm text-gray-600">
@@ -219,7 +209,6 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* Progress Bar */}
         <View className="mb-6 h-2 w-full overflow-hidden rounded-full bg-gray-200">
           <View 
             className="h-full bg-black transition-all"
@@ -229,13 +218,11 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           />
         </View>
 
-        {/* Step Title */}
         <View className="mb-4">
           <Text className="text-xl font-bold text-black">{getStepTitle()}</Text>
           <Text className="mt-1 text-sm text-gray-600">{getStepDescription()}</Text>
         </View>
 
-        {/* Scanned Data Display */}
         {scannedData.inputA && (
           <View className="mb-4 rounded-lg bg-blue-100 p-3">
             <Text className="text-sm font-medium text-blue-800">
@@ -252,21 +239,18 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           </View>
         )}
 
-        {/* Scan Card Area */}
         <View className="mb-6 h-64 items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50">
           <Text className="text-center text-base text-gray-500">
             {scanStep === 'logic-gate' ? 'Scan Logic Gate Card' : 'Scan Input Card'}
           </Text>
         </View>
 
-        {/* Start Camera Button */}
         <TouchableOpacity
           className="rounded-full bg-gray-300 px-6 py-4 active:bg-gray-400"
           onPress={handleStartCamera}>
           <Text className="text-center text-lg font-semibold text-black">Start Camera</Text>
         </TouchableOpacity>
 
-        {/* Result Display */}
         {scannedData.logicGate && (
           <View className="mt-6 rounded-xl bg-green-100 p-4">
             <Text className="mb-2 text-center text-lg font-bold text-green-800">
