@@ -69,9 +69,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ navigation, route }) => {
 
   const handleScanAgain = () => {
     if (source === 'scan') {
-      navigation.navigate('Scan');
+      navigation.navigate('Scan', { fromResult: true });
     } else {
-      navigation.navigate('ManualInput');
+      navigation.navigate('ManualInput', { fromResult: true });
     }
   };
 
@@ -100,7 +100,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ navigation, route }) => {
 
   const SignalFlowVisualizer = () => {
     return (
-      <View className="mb-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 p-6">
+      <View className="mb-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 p-6 ">
         <Text className="mb-6 text-center text-base font-bold text-white">
           Circuit Diagram
         </Text>
@@ -341,14 +341,17 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ navigation, route }) => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
-      <View className="flex-1 px-6 pt-12">
-        {/* Back Button */}
+    <View className="flex-1 bg-[#f4f8ff]">
+      <View className="absolute left-6 top-12 z-50">
         <TouchableOpacity
-          className="mb-4 h-12 w-12 items-center justify-center"
+          className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg"
           onPress={() => navigation.goBack()}>
-          <Text className="text-2xl text-black">←</Text>
+          <Text className="pb-2 text-2xl text-black font-bold">←</Text>
         </TouchableOpacity>
+      </View>
+
+      <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-1 px-6 pt-24">
 
         {/* Main Container */}
         <View className="mx-auto w-full max-w-md">
@@ -443,9 +446,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ navigation, route }) => {
 
           {!showSteps && (
             <TouchableOpacity
-              className="mb-6 rounded-full bg-gray-300 px-6 py-4 active:bg-gray-400"
+              className="mb-6 rounded-full bg-black px-6 py-4 active:bg-gray-400"
               onPress={() => setShowSteps(true)}>
-              <Text className="text-center text-lg font-semibold text-black">Analyze</Text>
+              <Text className="text-center text-lg font-semibold text-white">Analyze</Text>
             </TouchableOpacity>
           )}
 
@@ -563,7 +566,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ navigation, route }) => {
               </View>
 
               <TouchableOpacity
-                className="mb-3 rounded-full border-2 border-gray-300 bg-white px-6 py-4 active:bg-gray-50"
+                className="rounded-full border-2 border-gray-300 bg-white px-6 py-4 active:bg-gray-50 shadow-lg"
                 onPress={() => setShowSteps(false)}>
                 <Text className="text-center text-lg font-semibold text-black">Hide Step</Text>
               </TouchableOpacity>
@@ -571,15 +574,16 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ navigation, route }) => {
           )}
 
           <TouchableOpacity
-            className="mb-6 rounded-full bg-black px-6 py-4 active:bg-gray-800"
+            className="mb-16 rounded-full bg-white px-6 py-4 active:bg-gray-50 border-2 border-gray-300 shadow-lg"
             onPress={handleScanAgain}>
-            <Text className="text-center text-lg font-semibold text-white">
+            <Text className="text-center text-lg font-semibold text-black ">
               {source === 'scan' ? 'Scan Again' : 'Try Again'}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
+  </View>
   );
 };
 

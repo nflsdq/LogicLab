@@ -120,22 +120,24 @@ const cards: TruthTableCard[] = [
 
 const TruthTablesScreen: React.FC<TruthTablesScreenProps> = ({ navigation }) => {
   return (
-    <View className="flex-1 bg-[#f7f0e3]">
+    <View className="flex-1 bg-[#f4f8ff]">
       <SafeAreaView className="flex-1">
+        <View className="absolute left-5 top-12 z-50">
+          <TouchableOpacity
+            className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg"
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}>
+            <Text className="text-2xl text-black pb-2 font-bold">←</Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
             paddingHorizontal: 24,
             paddingBottom: 32,
-            paddingTop: 12,
+            paddingTop: 84,
           }}>
-          <TouchableOpacity
-            className="mb-6 h-12 w-12 items-center justify-center rounded-full bg-white"
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.7}>
-            <Text className="text-2xl text-black">←</Text>
-          </TouchableOpacity>
-
           <View className="mb-8 items-center rounded-3xl bg-white p-6" style={styles.cardShadow}>
             <View className="mb-4 rounded-2xl bg-green-100 p-5">
               <Feather name="grid" size={36} color="#1a9b75" />

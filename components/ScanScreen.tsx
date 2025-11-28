@@ -2,15 +2,18 @@ import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../App';
 
 type ScanScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Scan'>;
+type ScanScreenRouteProp = RouteProp<RootStackParamList, 'Scan'>;
 
 interface ScanScreenProps {
   navigation: ScanScreenNavigationProp;
+  route: ScanScreenRouteProp;
 }
 
-const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
+const ScanScreen: React.FC<ScanScreenProps> = ({ navigation, route }) => {
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -21,6 +24,15 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
     logicGate?: string;
   }>({});
   const cameraRef = useRef<CameraView>(null);
+  const fromResult = route?.params?.fromResult ?? false;
+
+  const handleBackPress = () => {
+    if (fromResult) {
+      navigation.navigate('Home');
+      return;
+    }
+    navigation.goBack();
+  };
 
   if (!permission) {
     return <View />;
@@ -194,11 +206,11 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <View className="flex-1 bg-white px-6 pt-12">
+    <View className="flex-1 bg-[#f4f8ff] px-6 pt-12">
       <TouchableOpacity
-        className="mb-4 w-12 h-12 items-center justify-center"
-        onPress={() => navigation.goBack()}>
-        <Text className="text-2xl text-black">←</Text>
+        className="mb-4 w-12 h-12 bg-white rounded-full items-center justify-center"
+        onPress={handleBackPress}>
+        <Text className="text-2xl text-black pb-2 font-bold">←</Text>
       </TouchableOpacity>
 
       <View className="mx-auto w-full max-w-md rounded-3xl bg-white p-6">
@@ -246,9 +258,9 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
         </View>
 
         <TouchableOpacity
-          className="rounded-full bg-gray-300 px-6 py-4 active:bg-gray-400"
+          className="rounded-full bg-black px-6 py-4 active:bg-gray-400"
           onPress={handleStartCamera}>
-          <Text className="text-center text-lg font-semibold text-black">Start Camera</Text>
+          <Text className="text-center text-lg font-semibold text-white">Start Camera</Text>
         </TouchableOpacity>
 
         {scannedData.logicGate && (

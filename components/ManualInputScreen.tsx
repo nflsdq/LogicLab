@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../App';
 import { LogicGateType, getGateIconName, getAllLogicGates } from '../utils/logicGates';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type ManualInputScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ManualInput'>;
+type ManualInputScreenRouteProp = RouteProp<RootStackParamList, 'ManualInput'>;
 
 interface ManualInputScreenProps {
   navigation: ManualInputScreenNavigationProp;
+  route: ManualInputScreenRouteProp;
 }
 
-const ManualInputScreen: React.FC<ManualInputScreenProps> = ({ navigation }) => {
+const ManualInputScreen: React.FC<ManualInputScreenProps> = ({ navigation, route }) => {
   const [step, setStep] = useState<'input' | 'gate'>('input');
   const [inputA, setInputA] = useState<'0' | '1'>('0');
   const [inputB, setInputB] = useState<'0' | '1'>('0');
   const [selectedGate, setSelectedGate] = useState<LogicGateType | ''>('');
+  const fromResult = route?.params?.fromResult ?? false;
 
   const handleSelectGate = () => {
     setStep('gate');
@@ -40,6 +44,18 @@ const ManualInputScreen: React.FC<ManualInputScreenProps> = ({ navigation }) => 
 
   const handleBackToInput = () => {
     setStep('input');
+  };
+
+  const handleBackPress = () => {
+    if (step === 'gate') {
+      setStep('input');
+      return;
+    }
+    if (fromResult) {
+      navigation.navigate('Home');
+      return;
+    }
+    navigation.goBack();
   };
 
   const renderInputStep = () => (
@@ -110,7 +126,7 @@ const ManualInputScreen: React.FC<ManualInputScreenProps> = ({ navigation }) => 
       </View>
 
       <TouchableOpacity
-        className="rounded-full bg-gray-300 px-6 py-4 active:bg-gray-400"
+        className="rounded-full bg-white px-6 py-4 active:bg-gray-400 border border-gray-300"
         onPress={handleSelectGate}>
         <Text className="text-center text-lg font-semibold text-black">Select Gate</Text>
       </TouchableOpacity>
@@ -162,9 +178,9 @@ const ManualInputScreen: React.FC<ManualInputScreenProps> = ({ navigation }) => 
 
       <View className="gap-3">
         <TouchableOpacity
-          className="rounded-full bg-gray-300 px-6 py-4 active:bg-gray-400"
+          className="rounded-full bg-black px-6 py-4 active:bg-gray-800"
           onPress={handleViewResult}>
-          <Text className="text-center text-lg font-semibold text-black">View Result</Text>
+          <Text className="text-center text-lg font-semibold text-white">View Result</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
@@ -178,13 +194,16 @@ const ManualInputScreen: React.FC<ManualInputScreenProps> = ({ navigation }) => 
 
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
-      <View className="flex-1 px-6 pt-12">
-        <TouchableOpacity
-          className="mb-4 h-12 w-12 items-center justify-center"
-          onPress={() => navigation.goBack()}>
-          <Text className="text-2xl text-black">←</Text>
-        </TouchableOpacity>
+    <ScrollView className="flex-1 bg-[#f4f8ff]" contentContainerStyle={{ flexGrow: 1 }}>
+      <View className="flex-1 px-6 pt-32">
+        <View className="absolute left-5 top-12 z-50">
+          <TouchableOpacity
+            className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg"
+            onPress={handleBackPress}
+            activeOpacity={0.7}>
+            <Text className="text-2xl text-black pb-2 font-bold">←</Text>
+          </TouchableOpacity>
+        </View>
 
         {step === 'input' && renderInputStep()}
         {step === 'gate' && renderGateStep()}
