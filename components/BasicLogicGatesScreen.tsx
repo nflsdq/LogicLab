@@ -113,27 +113,29 @@ const gates: GateCard[] = [
 
 const BasicLogicGatesScreen: React.FC<BasicLogicGatesScreenProps> = ({ navigation }) => {
   return (
-    <View className="flex-1 bg-[#f7f0e3]">
+    <View className="flex-1 bg-[#f4f8ff]">
       <SafeAreaView className="flex-1">
+        <View className="absolute left-5 top-12 z-50">
+          <TouchableOpacity
+            className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg"
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}>
+            <Text className="text-2xl text-black pb-2 font-bold">←</Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
             paddingHorizontal: 24,
             paddingBottom: 32,
-            paddingTop: 12,
+            paddingTop: 84,
           }}>
-          <TouchableOpacity
-            className="mb-6 h-12 w-12 items-center justify-center rounded-full bg-white"
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.7}>
-            <Text className="text-2xl text-black">←</Text>
-          </TouchableOpacity>
-
-          <View className="mb-8 rounded-3xl bg-white p-6" style={styles.cardShadow}>
+          <View className="mb-8 rounded-3xl items-center bg-white p-6" style={styles.cardShadow}>
             <View className="mb-4 w-16 rounded-2xl bg-blue-100 p-5">
               <MaterialCommunityIcons name="gate-and" size={40} color="#2563eb" />
             </View>
-            <Text className="text-3xl font-bold text-gray-900">Basic Logic Gates</Text>
+            <Text className="text-3xl text-center font-bold text-gray-900">Basic Logic Gates</Text>
             <Text className="mt-3 text-center text-base leading-6 text-gray-600">
               Pengertian, aturan kerja, dan intuisi cara memahami setiap gerbang.
             </Text>
@@ -148,25 +150,25 @@ const BasicLogicGatesScreen: React.FC<BasicLogicGatesScreenProps> = ({ navigatio
                   </View>
                   <View className="ml-4 flex-1">
                     <Text className="text-lg font-semibold text-gray-900">{gate.title}</Text>
-                    <View className="mt-4 rounded-2xl bg-[#fdf8ee] p-4">
-                      <Text className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
+                    <View className="mt-4 rounded-2xl p-4" style={[styles.infoCard, { backgroundColor: gate.bgColor }]}>
+                      <Text className="text-sm font-semibold uppercase tracking-[0.2em] text-black-500">
                         Pengertian
                       </Text>
                       <Text className="mt-2 text-base leading-6 text-gray-700">{gate.definition}</Text>
                     </View>
-                    <View className="mt-3 rounded-2xl bg-[#f4ede0] p-4">
-                      <Text className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
+                    <View className="mt-3 rounded-2xl p-4" style={[styles.infoCard, { backgroundColor: gate.bgColor }]}>
+                      <Text className="text-sm font-semibold uppercase tracking-[0.2em] text-black-500">
                         Aturan Kerja
                       </Text>
                       <Text className="mt-2 text-base leading-6 text-gray-700">{gate.rule}</Text>
                     </View>
-                    <View className="mt-3 rounded-2xl bg-[#eef5ff] p-4">
-                      <Text className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
+                    <View className="mt-3 rounded-2xl p-4" style={[styles.infoCard, { backgroundColor: gate.bgColor }]}>
+                      <Text className="text-sm font-semibold uppercase tracking-[0.2em] text-black-500">
                         Intuisi Cara Memahami
                       </Text>
-                      <Text className="mt-2 text-base leading-6 text-gray-700">{gate.intuition}</Text>
+                      <Text className="mt-2 text-base leading-6 text-black-700">{gate.intuition}</Text>
                     </View>
-                    <View className="mt-3 flex-row items-center justify-between rounded-2xl bg-[#f7f0e3] px-4 py-3">
+                    <View className="mt-3 flex-row items-center justify-between rounded-2xl bg-[#f4f8ff] px-4 py-3">
                       <View className="flex-row items-center gap-3">
                         {gate.inputs.map(input => (
                           <View key={`${gate.key}-${input}`} style={[styles.signalDot, { borderColor: gate.color }]}>
@@ -201,6 +203,10 @@ const styles = StyleSheet.create({
   iconWrapper: {
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.7)',
+  },
+  infoCard: {
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
   signalDot: {
     borderWidth: 2,

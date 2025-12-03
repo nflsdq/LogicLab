@@ -64,7 +64,7 @@ const symbols = [
 
 const LogicGateSymbolsScreen: React.FC<LogicGateSymbolsScreenProps> = ({ navigation }) => {
   return (
-    <View className="flex-1 bg-[#f7f0e3]">
+    <View className="flex-1 bg-[#f4f8ff]">
       <SafeAreaView className="flex-1">
         <ScrollView
           className="flex-1"
@@ -80,12 +80,12 @@ const LogicGateSymbolsScreen: React.FC<LogicGateSymbolsScreenProps> = ({ navigat
             <Text className="text-2xl text-black">←</Text>
           </TouchableOpacity>
 
-          <View className="mb-8 rounded-3xl bg-white p-6" style={styles.heroCard}>
+          <View className="mb-8 rounded-3xl items-center bg-white p-6" style={styles.heroCard}>
             <View className="mb-4 w-16 items-center justify-center rounded-2xl bg-amber-100 p-5">
               <MaterialCommunityIcons name="gate-and" size={36} color="#f5b100" />
             </View>
-            <Text className="text-3xl font-bold text-gray-900">Logic Gate Symbols</Text>
-            <Text className="mt-3 text-base leading-6 text-gray-600">
+            <Text className="text-3xl text-center font-bold text-gray-900">Logic Gate Symbols</Text>
+            <Text className="mt-3 text-base text-center leading-6 text-gray-600">
               Simbol standar gerbang logika (IEEE/ANSI).
             </Text>
           </View>

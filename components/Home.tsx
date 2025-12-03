@@ -11,7 +11,7 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
+    <ScrollView className="flex-1 bg-[#f4f8ff]" contentContainerStyle={{ flexGrow: 1 }}>
       <View className="flex-1 justify-center px-6">
         <View>
           <Text className="text-center text-4xl font-bold text-black">LogicLab Vision</Text>
@@ -20,7 +20,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </Text>
         </View>
 
-        <View>
+        <View className="">
           <Image source={require('../assets/images/home/home-logo.png')} className="w-full" resizeMode="contain" />
         </View>
 

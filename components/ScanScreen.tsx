@@ -2,14 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../App';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useTensorflowModel } from 'react-native-tflite';
 
 type ScanScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Scan'>;
+type ScanScreenRouteProp = RouteProp<RootStackParamList, 'Scan'>;
 
 interface ScanScreenProps {
   navigation: ScanScreenNavigationProp;
+  route: ScanScreenRouteProp;
 }
 
 // Label mapping sesuai dengan labels.txt
@@ -313,11 +316,11 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <View className="flex-1 bg-white px-6 pt-12">
+    <View className="flex-1 bg-[#f4f8ff] px-6 pt-12">
       <TouchableOpacity
-        className="mb-4 w-12 h-12 items-center justify-center"
-        onPress={() => navigation.goBack()}>
-        <Text className="text-2xl text-black">←</Text>
+        className="mb-4 w-12 h-12 bg-white rounded-full items-center justify-center"
+        onPress={handleBackPress}>
+        <Text className="text-2xl text-black pb-2 font-bold">←</Text>
       </TouchableOpacity>
 
       <View className="mx-auto w-full max-w-md rounded-3xl bg-white p-6">

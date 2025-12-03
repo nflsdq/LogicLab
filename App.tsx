@@ -15,8 +15,8 @@ import './global.css';
 
 export type RootStackParamList = {
   Home: undefined;
-  Scan: undefined;
-  ManualInput: undefined;
+  Scan: { fromResult?: boolean } | undefined;
+  ManualInput: { fromResult?: boolean } | undefined;
   Learn: undefined;
   BasicLogicGates: undefined;
   TruthTables: undefined;

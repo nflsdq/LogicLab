@@ -30,18 +30,7 @@ const learningTopics = [
       'Contoh kasus: sistem keamanan sederhana dan penalaran boolean dasar.',
     ],
   },
-  {
-    key: 'symbols',
-    title: 'Logic Gate Symbols',
-    description: 'Gambar standar simbol gerbang logika (IEEE/ANSI).',
-    icon: 'aperture',
-    color: '#f5b100',
-    accentBg: 'rgba(245, 177, 0, 0.15)',
-    details: [
-      'Perbandingan simbol IEC, IEEE, serta bentuk yang umum digunakan di buku teks.',
-      'Catatan singkat cara membaca tiap simbol di rangkaian skematik.',
-    ],
-  },
+  
   {
     key: 'quizzes',
     title: 'Short Quizzes',
@@ -74,22 +63,18 @@ const LearnScreen: React.FC<LearnScreenProps> = ({ navigation }) => {
       navigation.navigate('TruthTables');
       return;
     }
-    if (topicKey === 'symbols') {
-      navigation.navigate('LogicGateSymbols');
-      return;
-    }
     setActiveTopic(prev => (prev === topicKey ? null : topicKey));
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-[#f4f8ff]">
       <SafeAreaView className="flex-1">
         <View className="px-6 pt-4">
           <TouchableOpacity
-            className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-gray-100"
+            className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg"
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}>
-            <Text className="text-2xl text-black">←</Text>
+            <Text className="text-2xl text-black pb-2 font-bold">←</Text>
           </TouchableOpacity>
         </View>
 
@@ -130,11 +115,11 @@ const LearnScreen: React.FC<LearnScreenProps> = ({ navigation }) => {
                       name="chevron-right"
                       size={20}
                       color="#a0a0a0"
-                      style={{ transform: [{ rotate: activeTopic === topic.key ? '90deg' : '0deg' }] }}
+                      // style={{ transform: [{ rotate: activeTopic === topic.key ? '90deg' : '0deg' }] }}
                     />
                   </View>
                 </View>
-                {activeTopic === topic.key ? (
+                {/* {activeTopic === topic.key ? (
                   <View className="mt-4 rounded-2xl bg-[#f7f0e3] p-4">
                     {topic.details.map(point => (
                       <View key={point} className="mb-3 flex-row items-start">
@@ -143,7 +128,7 @@ const LearnScreen: React.FC<LearnScreenProps> = ({ navigation }) => {
                       </View>
                     ))}
                   </View>
-                ) : null}
+                ) : null} */}
               </TouchableOpacity>
             ))}
           </View>
