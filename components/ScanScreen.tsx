@@ -1,14 +1,19 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { useTensorflowModel } from 'react-native-tflite';
 
 type ScanScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Scan'>;
 
 interface ScanScreenProps {
   navigation: ScanScreenNavigationProp;
 }
+
+// Label mapping sesuai dengan labels.txt
+const LABELS = ['NOT', 'AND', 'OR'];
 
 const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -20,7 +25,18 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
     inputB?: string;
     logicGate?: string;
   }>({});
+  const [isProcessing, setIsProcessing] = useState(false);
   const cameraRef = useRef<CameraView>(null);
+
+  // Load TFLite model
+  const model = useTensorflowModel(require('../assets/models/model_unquant.tflite'));
+
+  useEffect(() => {
+    if (model.state === 'error') {
+      console.error('Failed to load model:', model.error);
+      Alert.alert('Error', 'Gagal memuat model AI. Pastikan file model tersedia.');
+    }
+  }, [model.state]);
 
   if (!permission) {
     return <View />;
@@ -49,57 +65,126 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
     setIsCameraActive(true);
   };
 
+  // Fungsi untuk klasifikasi gambar menggunakan TFLite
+  const classifyImage = async (imageUri: string): Promise<{ label: string; confidence: number } | null> => {
+    if (model.state !== 'loaded' || !model.model) {
+      Alert.alert('Error', 'Model AI belum siap. Tunggu sebentar...');
+      return null;
+    }
+
+    try {
+      // Resize image sesuai input model (224x224 untuk model Teachable Machine)
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        imageUri,
+        [{ resize: { width: 224, height: 224 } }],
+        { format: ImageManipulator.SaveFormat.JPEG }
+      );
+
+      // Jalankan inferensi menggunakan model TFLite
+      const result = await model.model.run([manipulatedImage.uri]);
+
+      // result biasanya berupa array probabilitas untuk setiap kelas
+      if (result && result.length > 0) {
+        const predictions = result[0] as number[];
+        const maxIndex = predictions.indexOf(Math.max(...predictions));
+        const confidence = predictions[maxIndex];
+
+        console.log('Predictions:', predictions);
+        console.log('Detected:', LABELS[maxIndex], 'Confidence:', (confidence * 100).toFixed(2) + '%');
+
+        return {
+          label: LABELS[maxIndex],
+          confidence: confidence,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Classification error:', error);
+      return null;
+    }
+  };
+
   const handleCapture = async () => {
-    if (cameraRef.current) {
-      try {
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.8,
-        });
-        
+    if (!cameraRef.current) return;
+
+    try {
+      setIsProcessing(true);
+
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.8,
+      });
+
+      if (!photo?.uri) {
+        throw new Error('Gagal mengambil foto');
+      }
+
+      if (scanStep === 'input-a') {
+        // Untuk input A, masih menggunakan mock karena model hanya untuk logic gate
         const mockScannedValue = Math.random() > 0.5 ? '1' : '0';
-        
-        if (scanStep === 'input-a') {
-          setScannedData({ ...scannedData, inputA: mockScannedValue });
-          Alert.alert('Scan Berhasil', `Input A: ${mockScannedValue}`, [
-            {
-              text: 'Lanjut ke Input B',
-              onPress: () => {
-                setScanStep('input-b');
-                setIsCameraActive(false);
-              },
+        setScannedData({ ...scannedData, inputA: mockScannedValue });
+        Alert.alert('Scan Berhasil', `Input A: ${mockScannedValue}`, [
+          {
+            text: 'Lanjut ke Input B',
+            onPress: () => {
+              setScanStep('input-b');
+              setIsCameraActive(false);
             },
-          ]);
-        } else if (scanStep === 'input-b') {
-          setScannedData({ ...scannedData, inputB: mockScannedValue });
-          Alert.alert('Scan Berhasil', `Input B: ${mockScannedValue}`, [
-            {
-              text: 'Lanjut ke Logic Gate',
-              onPress: () => {
-                setScanStep('logic-gate');
-                setIsCameraActive(false);
-              },
+          },
+        ]);
+      } else if (scanStep === 'input-b') {
+        // Untuk input B, masih menggunakan mock karena model hanya untuk logic gate
+        const mockScannedValue = Math.random() > 0.5 ? '1' : '0';
+        setScannedData({ ...scannedData, inputB: mockScannedValue });
+        Alert.alert('Scan Berhasil', `Input B: ${mockScannedValue}`, [
+          {
+            text: 'Lanjut ke Logic Gate',
+            onPress: () => {
+              setScanStep('logic-gate');
+              setIsCameraActive(false);
             },
-          ]);
-        } else if (scanStep === 'logic-gate') {
-          const gates = ['AND', 'OR', 'NOT', 'NAND', 'NOR', 'XOR'];
-          const mockGate = gates[Math.floor(Math.random() * gates.length)];
-          const updatedData = { ...scannedData, logicGate: mockGate };
+          },
+        ]);
+      } else if (scanStep === 'logic-gate') {
+        // Klasifikasi gambar untuk mendeteksi logic gate menggunakan TFLite
+        const detection = await classifyImage(photo.uri);
+
+        if (detection) {
+          const { label, confidence } = detection;
+          const updatedData = { ...scannedData, logicGate: label };
           setScannedData(updatedData);
           setIsCameraActive(false);
-          
-          setTimeout(() => {
-            navigation.navigate('Result', {
-              inputA: updatedData.inputA || '0',
-              inputB: updatedData.inputB || '0',
-              logicGate: mockGate as any,
-              source: 'scan',
-            });
-          }, 500);
+
+          Alert.alert(
+            'Logic Gate Terdeteksi! 🎉',
+            `Gate: ${label}\nConfidence: ${(confidence * 100).toFixed(1)}%`,
+            [
+              {
+                text: 'Lihat Hasil',
+                onPress: () => {
+                  navigation.navigate('Result', {
+                    inputA: updatedData.inputA || '0',
+                    inputB: updatedData.inputB || '0',
+                    logicGate: label as any,
+                    source: 'scan',
+                  });
+                },
+              },
+            ]
+          );
+        } else {
+          Alert.alert(
+            'Gagal Mendeteksi',
+            'Tidak dapat mendeteksi logic gate. Pastikan gambar jelas dan coba lagi.',
+            [{ text: 'OK' }]
+          );
         }
-      } catch (error) {
-        Alert.alert('Error', 'Gagal mengambil foto');
-        console.error(error);
       }
+    } catch (error) {
+      Alert.alert('Error', 'Gagal mengambil foto');
+      console.error(error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -123,11 +208,11 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   const getStepDescription = () => {
     switch (scanStep) {
       case 'input-a':
-        return 'Point camera at the first input signal';
+        return 'Arahkan kamera ke sinyal input pertama';
       case 'input-b':
-        return 'Point camera at the second input signal';
+        return 'Arahkan kamera ke sinyal input kedua';
       case 'logic-gate':
-        return 'Point camera at the logic gate';
+        return 'Arahkan kamera ke kartu logic gate (NOT, AND, OR)';
       default:
         return '';
     }
@@ -146,41 +231,75 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
     }
   };
 
+  const getModelStatusText = () => {
+    switch (model.state) {
+      case 'loading':
+        return 'Memuat model AI...';
+      case 'loaded':
+        return 'Model AI siap';
+      case 'error':
+        return 'Model AI gagal dimuat';
+      default:
+        return '';
+    }
+  };
+
   if (isCameraActive) {
     return (
       <View className="flex-1 bg-black">
-        <CameraView 
+        <CameraView
           ref={cameraRef}
-          style={StyleSheet.absoluteFillObject} 
+          style={StyleSheet.absoluteFillObject}
           facing={facing}
         >
           <View className="flex-1 justify-between bg-transparent p-6">
             <View className="items-center pt-12">
               <Text className="text-2xl font-bold text-white">{getStepTitle()}</Text>
               <Text className="mt-2 text-base text-white/90">{getStepDescription()}</Text>
+              
+              {/* Model status indicator */}
+              <View className={`mt-3 rounded-full px-4 py-1 ${
+                model.state === 'loaded' ? 'bg-green-500' : 
+                model.state === 'loading' ? 'bg-yellow-500' : 'bg-red-500'
+              }`}>
+                <Text className="text-xs text-white">{getModelStatusText()}</Text>
+              </View>
             </View>
 
             <View className="items-center justify-center">
               <View className="h-64 w-64 rounded-xl border-4 border-white/70" />
               {scannedData.inputA && scanStep !== 'input-a' && (
                 <View className="absolute -top-16 rounded-lg bg-blue-500 px-4 py-2">
-                  <Text className="text-sm text-white">Previous Input (A): {scannedData.inputA}</Text>
+                  <Text className="text-sm text-white">Input A: {scannedData.inputA}</Text>
                 </View>
               )}
               {scannedData.inputB && scanStep === 'logic-gate' && (
                 <View className="absolute -top-24 rounded-lg bg-blue-500 px-4 py-2">
-                  <Text className="text-sm text-white">Previous Input (B): {scannedData.inputB}</Text>
+                  <Text className="text-sm text-white">Input B: {scannedData.inputB}</Text>
                 </View>
               )}
             </View>
 
             <View className="items-center gap-4 pb-8">
+              {/* Loading indicator saat processing */}
+              {isProcessing && (
+                <View className="mb-2 flex-row items-center rounded-lg bg-yellow-500 px-4 py-2">
+                  <ActivityIndicator size="small" color="#fff" />
+                  <Text className="ml-2 text-sm text-white">Memproses gambar...</Text>
+                </View>
+              )}
+
               <TouchableOpacity
-                className="h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-white/30"
-                onPress={handleCapture}>
-                <View className="h-16 w-16 rounded-full bg-white" />
+                className={`h-20 w-20 items-center justify-center rounded-full border-4 border-white ${
+                  isProcessing || model.state !== 'loaded' ? 'bg-gray-500/30' : 'bg-white/30'
+                }`}
+                onPress={handleCapture}
+                disabled={isProcessing || model.state !== 'loaded'}>
+                <View className={`h-16 w-16 rounded-full ${
+                  isProcessing || model.state !== 'loaded' ? 'bg-gray-400' : 'bg-white'
+                }`} />
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 className="rounded-full bg-gray-800/80 px-6 py-3"
                 onPress={handleCloseCamera}>
@@ -209,11 +328,29 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
           </Text>
         </View>
 
+        {/* Model Status */}
+        <View className={`mb-4 rounded-lg p-3 ${
+          model.state === 'loaded' ? 'bg-green-100' : 
+          model.state === 'loading' ? 'bg-yellow-100' : 'bg-red-100'
+        }`}>
+          <View className="flex-row items-center">
+            {model.state === 'loading' && (
+              <ActivityIndicator size="small" color="#F59E0B" />
+            )}
+            <Text className={`ml-2 text-sm font-medium ${
+              model.state === 'loaded' ? 'text-green-800' : 
+              model.state === 'loading' ? 'text-yellow-800' : 'text-red-800'
+            }`}>
+              {getModelStatusText()}
+            </Text>
+          </View>
+        </View>
+
         <View className="mb-6 h-2 w-full overflow-hidden rounded-full bg-gray-200">
-          <View 
+          <View
             className="h-full bg-black transition-all"
-            style={{ 
-              width: scanStep === 'input-a' ? '33%' : scanStep === 'input-b' ? '66%' : '100%' 
+            style={{
+              width: scanStep === 'input-a' ? '33%' : scanStep === 'input-b' ? '66%' : '100%'
             }}
           />
         </View>
@@ -226,7 +363,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
         {scannedData.inputA && (
           <View className="mb-4 rounded-lg bg-blue-100 p-3">
             <Text className="text-sm font-medium text-blue-800">
-              Previous Input (A): {scannedData.inputA}
+              Input A: {scannedData.inputA}
             </Text>
           </View>
         )}
@@ -234,21 +371,28 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
         {scannedData.inputB && scanStep === 'logic-gate' && (
           <View className="mb-4 rounded-lg bg-blue-100 p-3">
             <Text className="text-sm font-medium text-blue-800">
-              Previous Input (B): {scannedData.inputB}
+              Input B: {scannedData.inputB}
             </Text>
           </View>
         )}
 
         <View className="mb-6 h-64 items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50">
           <Text className="text-center text-base text-gray-500">
-            {scanStep === 'logic-gate' ? 'Scan Logic Gate Card' : 'Scan Input Card'}
+            {scanStep === 'logic-gate' ? 'Scan Logic Gate Card\n(NOT, AND, OR)' : 'Scan Input Card'}
           </Text>
         </View>
 
         <TouchableOpacity
-          className="rounded-full bg-gray-300 px-6 py-4 active:bg-gray-400"
-          onPress={handleStartCamera}>
-          <Text className="text-center text-lg font-semibold text-black">Start Camera</Text>
+          className={`rounded-full px-6 py-4 ${
+            model.state === 'loaded' ? 'bg-gray-300 active:bg-gray-400' : 'bg-gray-200'
+          }`}
+          onPress={handleStartCamera}
+          disabled={model.state !== 'loaded'}>
+          <Text className={`text-center text-lg font-semibold ${
+            model.state === 'loaded' ? 'text-black' : 'text-gray-400'
+          }`}>
+            {model.state === 'loading' ? 'Memuat Model...' : 'Start Camera'}
+          </Text>
         </TouchableOpacity>
 
         {scannedData.logicGate && (
@@ -270,4 +414,3 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
 };
 
 export default ScanScreen;
-
